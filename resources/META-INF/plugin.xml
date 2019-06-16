@@ -1,0 +1,42 @@
+<idea-plugin>
+  <id>com.landray.kmss.plugin</id>
+  <name>KmssSign</name>
+  <version>1.0</version>
+  <vendor email="xionghw@landray.com.cn" url="http://java.landray.com.cn">Landray</vendor>
+
+  <description><![CDATA[
+      Kmss Plugin.<br>
+      <em>most HTML tags may be used</em>
+    ]]></description>
+
+  <change-notes><![CDATA[
+      20190613 Create By Hevin*Xiong.<br>
+      <em>most HTML tags may be used</em>
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="145.0"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+  <depends>com.intellij.modules.platform</depends>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+  </extensions>
+
+  <actions>
+    <!-- Add your actions here -->
+    <group id="com.landray.kmss.plugin" text="Kmss(_HEVIN)">
+      <add-to-group group-id="MainMenu" anchor="after" relative-to-action="BuildMenu"/>
+      <action class="CreatePatcherAction" id="CreatePatcherAction" text="发版签名..."/>
+      <action class="LicenseAction" id="LicenseAction" text="License下载..."/>
+      <action class="RegistMachineAction" id="registMachineAction" text="本机信息注册..."/>
+    </group>
+  </actions>
+
+</idea-plugin>
