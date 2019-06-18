@@ -7,13 +7,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBList;
 import com.landray.kmss.plugin.sign.SignParamStorer;
-import com.landray.kmss.plugin.util.DESUtil;
-import com.landray.kmss.plugin.util.FileUtil;
 
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,16 +29,36 @@ public class PatcherDialog extends JDialog {
     private JTextField svnAccont;
     private JTextField svnPassword;
     private JCheckBox checkBox;
+    private JRadioButton packageNONE;
+    private JRadioButton packageZIP;
+    private JRadioButton packageVAR;
     private AnActionEvent event;
     private JBList fieldList;
     private static final String[] SAVEKEYS = { "username",
-            "savePassword", "password" };
+            "savePassword", "password", "output", "zip", "scope" };
 
     PatcherDialog(final AnActionEvent event) {
         this.event = event;
         setTitle("请选择签名文件");
 
         setContentPane(contentPane);
+
+        Map result = SignParamStorer.getInstance().load(
+                SAVEKEYS,event.getProject().getBasePath()+File.separator+".idea");
+
+        if(result.size() != 0){
+            checkBox.setSelected(Boolean.valueOf((String)result.get("savePassword")));
+            svnAccont.setText((String)result.get("username"));
+            svnPassword.setText((String)result.get("password"));
+            savePath.setText((String)result.get("output"));
+            svnAddr.setText((String)result.get("svnAddr"));
+
+            packageNONE.setSelected(Boolean.valueOf((String)result.get("packageNONE")));
+            packageZIP.setSelected(Boolean.valueOf((String)result.get("packageZIP")));
+            packageVAR.setSelected(Boolean.valueOf((String)result.get("packageVAR")));
+
+        }
+
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
@@ -90,17 +107,6 @@ public class PatcherDialog extends JDialog {
 
     private void onOK() {
         try {
-            // 模块对象
-            Module module = event.getData(DataKeys.MODULE);
-            System.out.println(System.getProperty("user.dir"));
-            String projectUrl = module.getProject().getBasePath();
-            Map result = SignParamStorer.getInstance().load(
-                    SAVEKEYS,event.getProject().getBasePath()+File.separator+".idea");
-            String content = FileUtil.readFile(new File(projectUrl+File.pathSeparator+"sign.svn"));
-            System.out.println(content);
-            if(content != null && !"".equals(content)){
-
-            }
 
             // 条件校验
             if (null == savePath.getText() || "".equals(savePath.getText())) {
@@ -135,20 +141,22 @@ public class PatcherDialog extends JDialog {
             }
 
             if (checkBox.isSelected()) {
-                /*File file= new File(projectUrl+File.pathSeparator+"sign.svn");
-                if(!file.exists()){
-                    file.createNewFile();
-                }else{
-                    file.delete();
-                    file.createNewFile();
-                }*/
                 Map tmap = new HashMap();
                 tmap.put("svnAddr",svnAddr.getText());
                 tmap.put("svnAccont",svnAccont.getText());
                 tmap.put("svnPassword",svnPassword.getText());
-                FileUtil.writeFile(new File(projectUrl+File.pathSeparator+"sign.svn"),tmap.toString());
+                tmap.put("output",savePath.getText());
+                tmap.put("savePassword",String.valueOf(checkBox.isSelected()));
+
+                tmap.put("packageNONE",String.valueOf(packageNONE.isSelected()));
+                tmap.put("packageZIP",String.valueOf(packageZIP.isSelected()));
+                tmap.put("packageVAR",String.valueOf(packageVAR.isSelected()));
+                SignParamStorer.getInstance().save(tmap,
+                        SAVEKEYS,event.getProject().getBasePath()+File.separator+".idea");
             }
 
+            // 模块对象
+            Module module = event.getData(DataKeys.MODULE);
             CompilerModuleExtension instance = CompilerModuleExtension.getInstance(module);
             // 编译目录
             String compilerOutputUrl = instance.getCompilerOutputPath().getPath();
